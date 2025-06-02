@@ -1,0 +1,26 @@
+{
+  "name": "picyasuo",
+  "version": "1.0.0",
+  "description": "PicYaSuo - 在线图像压缩工具",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "vite preview"
+  },
+  "keywords": [
+    "image-compression",
+    "图片压缩",
+    "image-optimizer",
+    "web-tool"
+  ],
+  "author": "PicYaSuo Team",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+} 

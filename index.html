@@ -3,35 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图像压缩工具</title>
+    <title>PicYaSuo - 在线图像压缩工具</title>
+    <meta name="description" content="免费在线图像压缩工具，支持JPG、PNG等格式，快速压缩图片大小，保持高质量">
+    <meta name="keywords" content="图片压缩,在线压缩,图像优化,JPG压缩,PNG压缩">
+    <meta name="author" content="PicYaSuo">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="upload-area" id="uploadArea">
-            <img src="assets/compress-icon.svg" alt="上传图标" class="upload-icon">
-            <p>拖放图片到这里或点击上传</p>
-            <input type="file" id="fileInput" accept="image/*" hidden>
-        </div>
-        
-        <div class="preview-container" id="previewContainer" style="display: none;">
-            <div class="preview-box">
-                <h3>原图</h3>
-                <img id="originalPreview" alt="原图预览">
-                <div class="image-info" id="originalInfo"></div>
+    <!-- 页眉 -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 4L20 4M4 20L20 20M8 9L12 5L16 9M8 15L12 19L16 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>PicYaSuo</span>
             </div>
-            <div class="preview-box">
-                <h3>压缩后</h3>
-                <img id="compressedPreview" alt="压缩后预览">
-                <div class="image-info" id="compressedInfo"></div>
-                <div class="quality-control">
-                    <label for="qualitySlider">压缩质量: <span id="qualityValue">70%</span></label>
-                    <input type="range" id="qualitySlider" min="1" max="100" value="70" class="slider">
+            <nav class="nav">
+                <a href="#features">功能特点</a>
+                <a href="#how-to-use">使用方法</a>
+                <a href="#about">关于我们</a>
+            </nav>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="#features">功能特点</a>
+            <a href="#how-to-use">使用方法</a>
+            <a href="#about">关于我们</a>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="main">
+        <!-- 英雄区域 -->
+        <section class="hero">
+            <div class="hero-container">
+                <h1>智能图像压缩工具</h1>
+                <p>快速压缩图片大小，保持高质量，支持多种格式</p>
+            </div>
+        </section>
+
+        <!-- 工具区域 -->
+        <section class="tool-section">
+            <div class="container">
+                <div class="upload-area" id="uploadArea">
+                    <img src="/assets/compress-icon.svg" alt="上传图标" class="upload-icon">
+                    <p id="uploadText">拖放图片到这里或点击上传</p>
+                    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>正在处理图片...</p>
+                    </div>
+                    <input type="file" id="fileInput" accept="image/*" multiple hidden>
+                    <div class="supported-formats">
+                        <small>支持 JPG、PNG、WebP 等格式，单个文件最大 10MB，最多可选择 30 张图片</small>
+                    </div>
                 </div>
-                <button id="downloadBtn" class="download-btn">下载压缩图片</button>
+                
+                <!-- 批量操作控制栏 -->
+                <div class="batch-controls" id="batchControls" style="display: none;">
+                    <div class="batch-info">
+                        <span id="selectedCount">0</span> 张图片已选择
+                        <span id="processedCount" style="display: none;">，<span id="processedNum">0</span> 张已压缩</span>
+                    </div>
+                    <div class="batch-actions">
+                        <div class="quality-control-batch">
+                            <label for="batchQualitySlider">批量压缩质量: <span id="batchQualityValue">70%</span></label>
+                            <input type="range" id="batchQualitySlider" min="1" max="100" value="70" class="slider">
+                        </div>
+                        <div class="batch-buttons">
+                            <button id="compressAllBtn" class="batch-btn compress-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 4L20 4M4 20L20 20M8 9L12 5L16 9M8 15L12 19L16 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                压缩全部
+                            </button>
+                            <button id="downloadAllBtn" class="batch-btn download-btn" style="display: none;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                打包下载
+                            </button>
+                            <button id="clearAllBtn" class="batch-btn clear-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                清空全部
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 图片网格显示区域 -->
+                <div class="images-grid" id="imagesGrid" style="display: none;">
+                    <!-- 动态生成的图片卡片将在这里显示 -->
+                </div>
+                
+                <!-- 原有的单图预览容器（保持兼容） -->
+                <div class="preview-container" id="previewContainer" style="display: none;">
+                    <div class="preview-box">
+                        <div class="preview-header">
+                            <h3>原图</h3>
+                            <div class="image-badge original">原始</div>
+                        </div>
+                        <div class="image-wrapper">
+                            <img id="originalPreview" alt="原图预览">
+                        </div>
+                        <div class="image-info" id="originalInfo"></div>
+                    </div>
+                    
+                    <div class="preview-box">
+                        <div class="preview-header">
+                            <h3>压缩后</h3>
+                            <div class="image-badge compressed">已压缩</div>
+                        </div>
+                        <div class="image-wrapper">
+                            <img id="compressedPreview" alt="压缩后预览">
+                        </div>
+                        <div class="image-info" id="compressedInfo"></div>
+                        <div class="controls">
+                            <div class="quality-control">
+                                <label for="qualitySlider">压缩质量: <span id="qualityValue">70%</span></label>
+                                <input type="range" id="qualitySlider" min="1" max="100" value="70" class="slider">
+                            </div>
+                            <div class="button-group">
+                                <button id="resetBtn" class="reset-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12Z" stroke="currentColor" stroke-width="2"/>
+                                        <path d="M12 7V12L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    重新选择
+                                </button>
+                                <button id="downloadBtn" class="download-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    下载压缩图片
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 功能特点 -->
+        <section id="features" class="features">
+            <div class="container">
+                <h2>功能特点</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🚀</div>
+                        <h3>快速压缩</h3>
+                        <p>采用先进的压缩算法，快速处理图片，节省您的时间</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h3>质量可控</h3>
+                        <p>自由调节压缩质量，在文件大小和图片质量间找到完美平衡</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>隐私安全</h3>
+                        <p>所有处理都在本地完成，图片不会上传到服务器，保护您的隐私</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h3>多端适配</h3>
+                        <p>完美适配桌面端和移动端，随时随地压缩图片</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 使用方法 -->
+        <section id="how-to-use" class="how-to-use">
+            <div class="container">
+                <h2>使用方法</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>上传图片</h3>
+                        <p>拖拽图片到上传区域或点击选择文件</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>调节质量</h3>
+                        <p>使用滑块调节压缩质量，实时预览效果</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>下载图片</h3>
+                        <p>点击下载按钮保存压缩后的图片</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 4L20 4M4 20L20 20M8 9L12 5L16 9M8 15L12 19L16 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>PicYaSuo</span>
+                    </div>
+                    <p>专业的在线图像压缩工具</p>
+                </div>
+                <div class="footer-section">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="#features">功能特点</a></li>
+                        <li><a href="#how-to-use">使用方法</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>支持</h4>
+                    <ul>
+                        <li><a href="#about">关于我们</a></li>
+                        <li><a href="#contact">联系我们</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 PicYaSuo. 保留所有权利。</p>
             </div>
         </div>
-    </div>
+    </footer>
+
     <script src="script.js"></script>
 </body>
 </html> 
