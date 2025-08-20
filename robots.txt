@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://jpgtosmall.com/sitemap.xml
+
+# Allow all search engines to crawl the site
+Crawl-delay: 1
+
+# Disallow crawling of test files
+Disallow: /generate-logo.html
+Disallow: /create-logos.js
+Disallow: /format-test.html
+Disallow: /*.md$

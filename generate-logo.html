@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Logo Generator</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .logo-size {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 20px;
+            background: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>JPG to Small Logo Generator</h1>
+    <div class="logo-container">
+        <div class="logo-size">
+            <canvas id="logo16" width="16" height="16"></canvas>
+            <span>16x16 (favicon)</span>
+            <button onclick="downloadLogo('logo16', 'logo-16x16.png')">Download</button>
+        </div>
+        <div class="logo-size">
+            <canvas id="logo32" width="32" height="32"></canvas>
+            <span>32x32 (favicon)</span>
+            <button onclick="downloadLogo('logo32', 'logo-32x32.png')">Download</button>
+        </div>
+        <div class="logo-size">
+            <canvas id="logo48" width="48" height="48"></canvas>
+            <span>48x48 (browser)</span>
+            <button onclick="downloadLogo('logo48', 'logo-48x48.png')">Download</button>
+        </div>
+        <div class="logo-size">
+            <canvas id="logo64" width="64" height="64"></canvas>
+            <span>64x64 (brand)</span>
+            <button onclick="downloadLogo('logo64', 'logo-64x64.png')">Download</button>
+        </div>
+        <div class="logo-size">
+            <canvas id="logo128" width="128" height="128"></canvas>
+            <span>128x128 (brand)</span>
+            <button onclick="downloadLogo('logo128', 'logo-128x128.png')">Download</button>
+        </div>
+        <div class="logo-size">
+            <canvas id="logo192" width="192" height="192"></canvas>
+            <span>192x192 (PWA)</span>
+            <button onclick="downloadLogo('logo192', 'logo-192x192.png')">Download</button>
+        </div>
+        <div class="logo-size">
+            <canvas id="logo512" width="512" height="512"></canvas>
+            <span>512x512 (high-res)</span>
+            <button onclick="downloadLogo('logo512', 'logo-512x512.png')">Download</button>
+        </div>
+    </div>
+
+    <script>
+        function drawLogo(canvas) {
+            const ctx = canvas.getContext('2d');
+            const size = canvas.width;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Background circle
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const radius = size * 0.47;
+            
+            // Gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 0, size);
+            gradient.addColorStop(0, '#3B82F6');
+            gradient.addColorStop(1, '#1D4ED8');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Border
+            ctx.strokeStyle = '#1D4ED8';
+            ctx.lineWidth = size * 0.02;
+            ctx.stroke();
+            
+            // Compression arrow
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = size * 0.03;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            // Vertical line
+            ctx.beginPath();
+            ctx.moveTo(centerX, size * 0.25);
+            ctx.lineTo(centerX, size * 0.55);
+            ctx.stroke();
+            
+            // Arrow head
+            const arrowSize = size * 0.08;
+            ctx.beginPath();
+            ctx.moveTo(centerX - arrowSize, size * 0.47);
+            ctx.lineTo(centerX, size * 0.55);
+            ctx.lineTo(centerX + arrowSize, size * 0.47);
+            ctx.stroke();
+            
+            // Image frame
+            const frameX = size * 0.35;
+            const frameY = size * 0.62;
+            const frameW = size * 0.3;
+            const frameH = size * 0.23;
+            
+            ctx.fillStyle = 'white';
+            ctx.fillRect(frameX, frameY, frameW, frameH);
+            ctx.strokeStyle = '#E5E7EB';
+            ctx.lineWidth = size * 0.008;
+            ctx.strokeRect(frameX, frameY, frameW, frameH);
+            
+            // Image content (simple representation)
+            ctx.fillStyle = '#F59E0B';
+            ctx.beginPath();
+            ctx.arc(frameX + frameW * 0.2, frameY + frameH * 0.25, size * 0.025, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Simple mountain/image lines
+            ctx.strokeStyle = '#6B7280';
+            ctx.lineWidth = size * 0.006;
+            ctx.beginPath();
+            ctx.moveTo(frameX + frameW * 0.1, frameY + frameH * 0.8);
+            ctx.lineTo(frameX + frameW * 0.3, frameY + frameH * 0.5);
+            ctx.lineTo(frameX + frameW * 0.5, frameY + frameH * 0.8);
+            ctx.lineTo(frameX + frameW * 0.7, frameY + frameH * 0.4);
+            ctx.lineTo(frameX + frameW * 0.9, frameY + frameH * 0.6);
+            ctx.stroke();
+            
+            // JPG text (only for larger sizes)
+            if (size >= 48) {
+                ctx.fillStyle = 'white';
+                ctx.font = `bold ${size * 0.08}px Arial, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText('JPG', centerX, size * 0.95);
+            }
+        }
+        
+        function downloadLogo(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Draw all logos when page loads
+        window.onload = function() {
+            const canvases = ['logo16', 'logo32', 'logo48', 'logo64', 'logo128', 'logo192', 'logo512'];
+            canvases.forEach(id => {
+                const canvas = document.getElementById(id);
+                drawLogo(canvas);
+            });
+        };
+    </script>
+</body>
+</html>
