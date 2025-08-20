@@ -15,12 +15,21 @@ export default defineConfig({
     sourcemap: true,
     minify: 'terser',
     rollupOptions: {
+      input: {
+        main: 'index.html',
+        about: 'about.html',
+        contact: 'contact.html',
+        privacy: 'privacy.html',
+        '404': '404.html'
+      },
       output: {
         chunkFileNames: 'js/[name]-[hash].js',
         entryFileNames: 'js/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]'
       }
-    }
+    },
+    // 确保静态文件被复制
+    copyPublicDir: true
   },
   
   // 静态资源处理
