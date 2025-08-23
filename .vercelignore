@@ -1,0 +1,28 @@
+# 忽略不需要的文件和目录
+*.md
+README.md
+LICENSE
+.DS_Store
+.git/
+.gitignore
+.vscode/
+.specstory/
+.cursorindexingignore
+
+# 忽略测试和调试文件
+test-*
+debug-*
+upload-test-*
+format-test*
+generate-logo*
+create-logos*
+
+# 忽略文档文件
+*-test-results.md
+*-update.md
+*-optimization.md
+*-guide.md
+*-fix.md
+*-assessment.md
+*-implementation.md
+website-structure.md
