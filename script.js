@@ -100,16 +100,34 @@ document.addEventListener('DOMContentLoaded', function() {
     // Click upload area to trigger file selection
     uploadArea.addEventListener('click', function(e) {
         console.log('Upload area clicked');
-        e.preventDefault();
-        fileInput.click();
+        console.log('File input element:', fileInput);
+        
+        // 不要使用 preventDefault，它可能阻止文件选择框
+        try {
+            if (fileInput) {
+                fileInput.click();
+                console.log('File input click triggered');
+            } else {
+                console.error('File input element not found');
+            }
+        } catch (error) {
+            console.error('Error triggering file input:', error);
+        }
     });
     
     // 添加键盘支持（无障碍访问）
     uploadArea.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' || e.key === ' ') {
             console.log('Keyboard trigger on upload area');
-            e.preventDefault();
-            fileInput.click();
+            e.preventDefault(); // 这里保留preventDefault防止滚动
+            try {
+                if (fileInput) {
+                    fileInput.click();
+                    console.log('File input click triggered via keyboard');
+                }
+            } catch (error) {
+                console.error('Error triggering file input via keyboard:', error);
+            }
         }
     });
     
