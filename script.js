@@ -99,36 +99,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Click upload area to trigger file selection
     uploadArea.addEventListener('click', function(e) {
-        console.log('Upload area clicked - NEW VERSION');
-        console.log('File input element:', fileInput);
-        console.log('File input type:', fileInput.type);
-        console.log('File input disabled:', fileInput.disabled);
+        console.log('Upload area clicked - SIMPLE VERSION');
         
-        // 移除hidden属性，点击后再隐藏（某些浏览器需要这样）
-        const wasHidden = fileInput.hasAttribute('hidden');
-        if (wasHidden) {
-            fileInput.removeAttribute('hidden');
-            fileInput.style.position = 'absolute';
-            fileInput.style.left = '-9999px';
-            fileInput.style.opacity = '0';
-        }
+        // 阻止事件冒泡，防止重复触发
+        e.stopPropagation();
         
+        // 直接触发文件输入框
         try {
-            // 延迟一帧确保DOM更新
-            setTimeout(() => {
-                fileInput.click();
-                console.log('File input click triggered');
-                
-                // 恢复隐藏状态
-                if (wasHidden) {
-                    fileInput.setAttribute('hidden', '');
-                    fileInput.style.position = '';
-                    fileInput.style.left = '';
-                    fileInput.style.opacity = '';
-                }
-            }, 10);
+            fileInput.click();
+            console.log('File input click triggered');
         } catch (error) {
             console.error('Error triggering file input:', error);
+            // 备用方案：临时显示文件输入框
+            fileInput.style.display = 'block';
+            fileInput.style.position = 'absolute';
+            fileInput.style.top = '0';
+            fileInput.style.left = '0';
+            fileInput.style.opacity = '0.01';
+            
+            setTimeout(() => {
+                fileInput.click();
+                fileInput.style.display = 'none';
+                fileInput.style.position = '';
+                fileInput.style.top = '';
+                fileInput.style.left = '';
+                fileInput.style.opacity = '';
+            }, 50);
         }
     });
     
