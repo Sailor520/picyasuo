@@ -155,6 +155,7 @@ body {
     height: 64px;
     margin-bottom: 20px;
     opacity: 0.6;
+    pointer-events: none;
 }
 
 .upload-area p {
@@ -162,12 +163,14 @@ body {
     color: #6b7280;
     font-weight: 500;
     margin-bottom: 8px;
+    pointer-events: none;
 }
 
 .upload-hint {
     font-size: 0.875rem !important;
     color: #9ca3af !important;
     font-weight: 400 !important;
+    pointer-events: none;
     margin-bottom: 0 !important;
 }
 

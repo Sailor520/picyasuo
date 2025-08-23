@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传功能调试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-area { 
+            border: 2px dashed #ccc; 
+            padding: 40px; 
+            text-align: center; 
+            cursor: pointer; 
+            margin: 20px 0;
+            background: #f9f9f9;
+        }
+        .test-area:hover { border-color: #007bff; background: #e7f3ff; }
+        .log { background: #f8f9fa; padding: 10px; margin: 10px 0; border-left: 4px solid #007bff; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>上传功能调试页面</h1>
+    
+    <div class="log" id="log">
+        <strong>调试日志：</strong><br>
+        页面加载完成...<br>
+    </div>
+    
+    <div class="test-area" id="testArea">
+        <p>点击这里测试上传功能</p>
+        <input type="file" id="testInput" accept="image/*" style="display: none;">
+    </div>
+    
+    <button onclick="testDirectClick()">直接点击文件输入</button>
+    <button onclick="testProgrammaticClick()">程序触发点击</button>
+    <button onclick="clearLog()">清除日志</button>
+    
+    <script>
+        const log = document.getElementById('log');
+        const testArea = document.getElementById('testArea');
+        const testInput = document.getElementById('testInput');
+        
+        function addLog(message) {
+            const time = new Date().toLocaleTimeString();
+            log.innerHTML += `[${time}] ${message}<br>`;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            log.innerHTML = '<strong>调试日志：</strong><br>';
+        }
+        
+        // 环境信息
+        addLog(`URL: ${window.location.href}`);
+        addLog(`User Agent: ${navigator.userAgent.substring(0, 80)}...`);
+        addLog(`协议: ${window.location.protocol}`);
+        addLog(`主机: ${window.location.hostname}`);
+        
+        // 测试区域点击
+        testArea.addEventListener('click', function(e) {
+            addLog('测试区域被点击');
+            addLog(`点击目标: ${e.target.tagName}`);
+            try {
+                testInput.click();
+                addLog('文件输入点击成功');
+            } catch (error) {
+                addLog(`文件输入点击失败: ${error.message}`);
+            }
+        });
+        
+        // 文件选择
+        testInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                addLog(`文件已选择: ${e.target.files[0].name}`);
+                addLog(`文件大小: ${(e.target.files[0].size / 1024).toFixed(2)} KB`);
+                addLog(`文件类型: ${e.target.files[0].type}`);
+            } else {
+                addLog('文件选择被取消');
+            }
+        });
+        
+        // 测试函数
+        function testDirectClick() {
+            addLog('测试直接点击文件输入...');
+            testInput.click();
+        }
+        
+        function testProgrammaticClick() {
+            addLog('测试程序触发点击...');
+            setTimeout(() => {
+                testInput.click();
+            }, 100);
+        }
+        
+        // 拖拽测试
+        testArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            addLog('拖拽悬停');
+        });
+        
+        testArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            addLog('文件拖拽放下');
+            if (e.dataTransfer.files.length > 0) {
+                addLog(`拖拽文件: ${e.dataTransfer.files[0].name}`);
+            }
+        });
+        
+        addLog('调试页面初始化完成');
+    </script>
+</body>
+</html>

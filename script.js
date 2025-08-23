@@ -1,7 +1,35 @@
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded');
+    console.log('Current URL:', window.location.href);
+    console.log('User Agent:', navigator.userAgent);
+    
     // DOM Elements
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
+    
+    // Debug: Check if elements exist
+    console.log('uploadArea:', uploadArea);
+    console.log('fileInput:', fileInput);
+    
+    // Check if upload area is visible and clickable
+    if (uploadArea) {
+        const rect = uploadArea.getBoundingClientRect();
+        const styles = window.getComputedStyle(uploadArea);
+        console.log('Upload area position:', rect);
+        console.log('Upload area display:', styles.display);
+        console.log('Upload area visibility:', styles.visibility);
+        console.log('Upload area pointer-events:', styles.pointerEvents);
+    }
+    
+    // Check if elements exist before adding event listeners
+    if (!uploadArea) {
+        console.error('Upload area not found!');
+        return;
+    }
+    if (!fileInput) {
+        console.error('File input not found!');
+        return;
+    }
     const qualitySection = document.getElementById('qualitySection');
     const previewSection = document.getElementById('previewSection');
     const originalPreview = document.getElementById('originalPreview');
@@ -70,22 +98,43 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Click upload area to trigger file selection
-    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('click', function(e) {
+        console.log('Upload area clicked');
+        e.preventDefault();
+        fileInput.click();
+    });
+    
+    // 添加键盘支持（无障碍访问）
+    uploadArea.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            console.log('Keyboard trigger on upload area');
+            e.preventDefault();
+            fileInput.click();
+        }
+    });
+    
+    // 确保上传区域可以获得焦点
+    uploadArea.setAttribute('tabindex', '0');
+    uploadArea.setAttribute('role', 'button');
+    uploadArea.setAttribute('aria-label', 'Click to upload image');
 
     // Handle drag and drop
     uploadArea.addEventListener('dragover', (e) => {
+        console.log('Drag over');
         e.preventDefault();
         uploadArea.style.borderColor = '#3b82f6';
         uploadArea.style.backgroundColor = '#eff6ff';
     });
 
     uploadArea.addEventListener('dragleave', (e) => {
+        console.log('Drag leave');
         e.preventDefault();
         uploadArea.style.borderColor = '#d1d5db';
         uploadArea.style.backgroundColor = '#f9fafb';
     });
 
     uploadArea.addEventListener('drop', (e) => {
+        console.log('File dropped:', e.dataTransfer.files[0]);
         e.preventDefault();
         uploadArea.style.borderColor = '#d1d5db';
         uploadArea.style.backgroundColor = '#f9fafb';
@@ -97,6 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle file selection
     fileInput.addEventListener('change', (e) => {
+        console.log('File input changed:', e.target.files[0]);
         const file = e.target.files[0];
         if (file && validateFile(file)) {
             processImage(file);
