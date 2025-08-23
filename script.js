@@ -99,17 +99,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Click upload area to trigger file selection
     uploadArea.addEventListener('click', function(e) {
-        console.log('Upload area clicked');
+        console.log('Upload area clicked - NEW VERSION');
         console.log('File input element:', fileInput);
+        console.log('File input type:', fileInput.type);
+        console.log('File input disabled:', fileInput.disabled);
         
-        // 不要使用 preventDefault，它可能阻止文件选择框
+        // 移除hidden属性，点击后再隐藏（某些浏览器需要这样）
+        const wasHidden = fileInput.hasAttribute('hidden');
+        if (wasHidden) {
+            fileInput.removeAttribute('hidden');
+            fileInput.style.position = 'absolute';
+            fileInput.style.left = '-9999px';
+            fileInput.style.opacity = '0';
+        }
+        
         try {
-            if (fileInput) {
+            // 延迟一帧确保DOM更新
+            setTimeout(() => {
                 fileInput.click();
                 console.log('File input click triggered');
-            } else {
-                console.error('File input element not found');
-            }
+                
+                // 恢复隐藏状态
+                if (wasHidden) {
+                    fileInput.setAttribute('hidden', '');
+                    fileInput.style.position = '';
+                    fileInput.style.left = '';
+                    fileInput.style.opacity = '';
+                }
+            }, 10);
         } catch (error) {
             console.error('Error triggering file input:', error);
         }
