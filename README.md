@@ -140,6 +140,7 @@ jpgtosmall/
 ├── 404.html           # Error page
 ├── styles.css         # Main stylesheet
 ├── script.js          # Application logic
+├── config.js          # Environment configuration
 ├── png-compression-test.html # PNG compression testing tool
 ├── assets/            # Static assets
 │   ├── logo-16.svg    # Favicon 16x16
@@ -204,6 +205,37 @@ When developing locally, ensure all asset paths use **relative paths** (not abso
 - Use relative paths (`assets/`) for local development
 - Use absolute paths (`/assets/`) for production deployment
 - Consider using environment-based path configuration
+
+### 🌐 Smart Environment Configuration
+
+**New: Automatic Path Management**
+
+We've implemented a smart configuration system that automatically handles paths for different environments:
+
+```javascript
+// config.js - Environment-aware path configuration
+const config = {
+    isProduction: window.location.hostname === 'www.jpgtosmall.com',
+    isLocal: window.location.protocol === 'file:',
+    
+    assets: {
+        local: 'assets/',           // Local: assets/logo.svg
+        production: '/assets/'      // Production: /assets/logo.svg
+    }
+};
+```
+
+**Features:**
+- ✅ **Automatic Detection**: Detects local vs production environment
+- ✅ **Dynamic Paths**: Automatically sets correct paths on page load
+- ✅ **No Manual Changes**: Works in both environments without code changes
+- ✅ **Fallback Support**: Gracefully handles missing configuration
+
+**Usage:**
+1. Include `config.js` in your HTML files
+2. Add IDs to resource elements (favicon, images)
+3. Paths are automatically configured based on environment
+4. No need to manually change paths between local and production
 
 ### Browser Requirements
 - Modern browsers with HTML5 Canvas support

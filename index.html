@@ -47,13 +47,16 @@
     <link rel="canonical" href="https://www.jpgtosmall.com/">
 
     <!-- Favicon and Icons -->
-    <link rel="icon" type="image/svg+xml" href="assets/logo-32.svg">
-    <link rel="icon" type="image/svg+xml" sizes="32x32" href="assets/logo-32.svg">
-    <link rel="icon" type="image/svg+xml" sizes="16x16" href="assets/logo-16.svg">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.svg">
+    <link rel="icon" type="image/svg+xml" href="assets/logo-32.svg" id="favicon32">
+    <link rel="icon" type="image/svg+xml" sizes="32x32" href="assets/logo-32.svg" id="favicon32sized">
+    <link rel="icon" type="image/svg+xml" sizes="16x16" href="assets/logo-16.svg" id="favicon16">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.svg" id="appleTouchIcon">
     <!-- <link rel="manifest" href="site.webmanifest"> Disabled for local development -->
 
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Environment Configuration -->
+    <script src="config.js"></script>
 
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -116,7 +119,7 @@
     <nav class="top-nav">
         <div class="container">
             <div class="nav-brand">
-                <img src="assets/logo-64.svg" alt="JPG to Small" class="brand-icon">
+                <img src="assets/logo-64.svg" alt="JPG to Small" class="brand-icon" id="brandLogo">
                 <span class="brand-text">JPG to Small</span>
             </div>
         </div>
@@ -137,7 +140,7 @@
             <section class="upload-section">
                 <h3 style="text-align: center;">1. Upload Your Image (JPG/JPEG/PNG)</h3>
                 <div class="upload-area" id="uploadArea">
-                    <img src="assets/compress-icon.svg" alt="Upload icon" class="upload-icon">
+                    <img src="assets/compress-icon.svg" alt="Upload icon" class="upload-icon" id="uploadIcon">
                     <p>Drag and drop your image here or click to upload</p>
                     <p class="upload-hint">Supported formats: JPG, JPEG, PNG (Max: 30MB)</p>
                     <input type="file" id="fileInput"

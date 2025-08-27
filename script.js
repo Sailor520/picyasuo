@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Current URL:', window.location.href);
     console.log('User Agent:', navigator.userAgent);
     
+    // Configure paths based on environment
+    configurePaths();
+    
     // DOM Elements
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
@@ -61,6 +64,38 @@ document.addEventListener('DOMContentLoaded', function() {
         canvas.height = 1;
         const dataURL = canvas.toDataURL('image/webp');
         return dataURL.indexOf('data:image/webp') === 0;
+    }
+
+    // 配置路径基于环境
+    function configurePaths() {
+        if (typeof window.appConfig === 'undefined') {
+            console.warn('App config not found, using default paths');
+            return;
+        }
+        
+        const config = window.appConfig;
+        const env = config.getEnvironment();
+        console.log('Configuring paths for environment:', env);
+        
+        // 配置favicon路径
+        const favicon32 = document.getElementById('favicon32');
+        const favicon32sized = document.getElementById('favicon32sized');
+        const favicon16 = document.getElementById('favicon16');
+        const appleTouchIcon = document.getElementById('appleTouchIcon');
+        
+        if (favicon32) favicon32.href = config.getAssetPath('logo-32.svg');
+        if (favicon32sized) favicon32sized.href = config.getAssetPath('logo-32.svg');
+        if (favicon16) favicon16.href = config.getAssetPath('logo-16.svg');
+        if (appleTouchIcon) appleTouchIcon.href = config.getAssetPath('apple-touch-icon.svg');
+        
+        // 配置图片路径
+        const brandLogo = document.getElementById('brandLogo');
+        const uploadIcon = document.getElementById('uploadIcon');
+        
+        if (brandLogo) brandLogo.src = config.getAssetPath('logo-64.svg');
+        if (uploadIcon) uploadIcon.src = config.getAssetPath('compress-icon.svg');
+        
+        console.log('Paths configured successfully');
     }
 
     // 初始化格式选择
