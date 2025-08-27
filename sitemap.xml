@@ -31,7 +31,13 @@
         <priority>0.3</priority>
     </url>
     <url>
-        <loc>https://www.jpgtosmall.com/format-test.html</loc>
+        <loc>https://www.jpgtosmall.com/png-compression-test.html</loc>
+        <lastmod>2025-01-25</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://www.jpgtosmall.com/generate-logo.html</loc>
         <lastmod>2025-01-25</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>

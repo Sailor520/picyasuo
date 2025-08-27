@@ -289,12 +289,15 @@ document.addEventListener('DOMContentLoaded', function() {
         let height = imageData.img.naturalHeight || imageData.img.height;
         const maxSize = 1200;
 
-        if (width > height && width > maxSize) {
-            height = (height * maxSize) / width;
-            width = maxSize;
-        } else if (height > maxSize) {
-            width = (width * maxSize) / height;
-            height = maxSize;
+        // 只有当图片超过最大尺寸时才缩小，避免放大
+        if (width > maxSize || height > maxSize) {
+            if (width > height && width > maxSize) {
+                height = (height * maxSize) / width;
+                width = maxSize;
+            } else if (height > maxSize) {
+                width = (width * maxSize) / height;
+                height = maxSize;
+            }
         }
 
         canvas.width = width;
@@ -325,47 +328,20 @@ document.addEventListener('DOMContentLoaded', function() {
             const format = formatMap[selectedFormat];
             const outputMimeType = format.mime;
             const fileExtension = format.ext;
+            
+            // PNG特殊处理：智能压缩策略
+            if (selectedFormat === 'png' && imageData.file.type === 'image/png') {
+                console.log('开始PNG智能压缩处理');
+                handlePNGCompression(imageData, canvas, width, height, format);
+                return;
+            }
+            
             const compressionQuality = format.quality ? quality : 1.0;
 
             // 转换为blob并显示
             canvas.toBlob((blob) => {
                 if (blob) {
-                    const compressedUrl = URL.createObjectURL(blob);
-                    compressedPreview.src = compressedUrl;
-                    compressedPreview.style.display = 'block';
-                    compressedPlaceholder.style.display = 'none';
-                    compressedContainer.classList.add('has-image');
-                    compressedInfo.textContent = `Size: ${(blob.size / 1024).toFixed(2)} KB`;
-
-                    // 显示下载按钮
-                    downloadBtn.style.display = 'inline-block';
-
-                    // 设置下载按钮
-                    downloadBtn.onclick = () => {
-                        const link = document.createElement('a');
-                        link.href = compressedUrl;
-                        const originalName = imageData.file.name.substring(0, imageData.file.name.lastIndexOf('.')) || 'image';
-                        link.download = `${originalName}_jpgtosmall.${fileExtension}`;
-                        link.click();
-                    };
-
-                    // 显示格式转换提示
-                    const originalFormat = imageData.file.type.split('/')[1].toUpperCase();
-                    const outputFormatName = fileExtension.toUpperCase();
-
-                    if (originalFormat !== outputFormatName) {
-                        const formatNote = document.createElement('div');
-                        formatNote.style.fontSize = '0.8em';
-                        formatNote.style.color = '#666';
-                        formatNote.style.marginTop = '5px';
-
-                        if (outputMimeType === 'image/png' && hasTransparency(imageData.img)) {
-                            formatNote.textContent = `Converted to PNG (transparent background preserved)`;
-                        } else {
-                            formatNote.textContent = `Converted from ${originalFormat} to ${outputFormatName}`;
-                        }
-                        compressedInfo.appendChild(formatNote);
-                    }
+                    displayCompressedResult(blob, imageData, format, fileExtension, outputMimeType);
                 } else {
                     compressedInfo.textContent = 'Compression failed';
                     console.error('Failed to create compressed blob');
@@ -375,6 +351,247 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             compressedInfo.textContent = 'Compression error';
             console.error('Compression error:', error);
+        }
+    }
+
+    // PNG智能压缩处理函数
+    function handlePNGCompression(imageData, canvas, width, height, format) {
+        console.log('开始PNG智能压缩处理');
+        const originalSize = imageData.file.size;
+        const originalWidth = imageData.img.naturalWidth;
+        const originalHeight = imageData.img.naturalHeight;
+        
+        console.log('原图信息:', {
+            size: originalSize,
+            width: originalWidth,
+            height: originalHeight,
+            targetWidth: width,
+            targetHeight: height
+        });
+        
+        // 总是尝试压缩，但确保不会变大
+        console.log('尝试PNG压缩...');
+        canvas.toBlob((blob) => {
+            if (blob) {
+                console.log('压缩结果:', {
+                    originalSize: originalSize,
+                    compressedSize: blob.size,
+                    sizeChange: blob.size - originalSize
+                });
+                
+                if (blob.size <= originalSize) {
+                    // 压缩成功，文件变小或相等
+                    console.log('压缩成功，文件变小或相等');
+                    displayCompressedResult(blob, imageData, format, format.ext, format.mime);
+                } else {
+                    // 压缩后变大，尝试其他策略
+                    console.log('压缩后变大，尝试其他策略');
+                    tryAlternativePNGStrategies(imageData, originalSize, format);
+                }
+            } else {
+                // 压缩失败，使用原图
+                console.log('压缩失败，使用原图');
+                useOriginalPNG(imageData, format);
+            }
+        }, 'image/png', 1.0);
+    }
+
+    // 尝试其他PNG压缩策略
+    function tryAlternativePNGStrategies(imageData, originalSize, format) {
+        console.log('尝试其他PNG压缩策略...');
+        const originalWidth = imageData.img.naturalWidth;
+        const originalHeight = imageData.img.naturalHeight;
+        
+        // 策略1：尝试更激进的尺寸缩小
+        const aggressiveSizes = [800, 600, 400];
+        let compressionAttempted = false;
+        
+        for (let maxDim of aggressiveSizes) {
+            if (originalWidth <= maxDim && originalHeight <= maxDim) {
+                console.log(`跳过尺寸 ${maxDim}px，原图更小`);
+                continue;
+            }
+            
+            console.log(`尝试尺寸 ${maxDim}px 压缩...`);
+            compressionAttempted = true;
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            let width = originalWidth;
+            let height = originalHeight;
+            
+            if (width > height && width > maxDim) {
+                height = (height * maxDim) / width;
+                width = maxDim;
+            } else if (height > maxDim) {
+                width = (width * maxDim) / height;
+                height = maxDim;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            // 检查透明度
+            if (hasTransparency(imageData.img)) {
+                ctx.drawImage(imageData.img, 0, 0, width, height);
+            } else {
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, width, height);
+                ctx.drawImage(imageData.img, 0, 0, width, height);
+            }
+            
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    console.log(`尺寸 ${maxDim}px 压缩结果:`, {
+                        originalSize: originalSize,
+                        compressedSize: blob.size,
+                        sizeChange: blob.size - originalSize,
+                        success: blob.size <= originalSize
+                    });
+                    
+                    if (blob.size <= originalSize) {
+                        // 找到合适的压缩方案
+                        console.log(`找到合适的压缩方案: ${maxDim}px`);
+                        displayCompressedResult(blob, imageData, format, format.ext, format.mime);
+                        return;
+                    }
+                }
+            }, 'image/png', 1.0);
+        }
+        
+        if (!compressionAttempted) {
+            console.log('原图尺寸太小，无法进行激进压缩');
+        }
+        
+        // 策略2：如果所有压缩策略都失败，建议转换为JPEG
+        console.log('所有PNG压缩策略失败，尝试转换为JPEG...');
+        suggestJPEGConversion(imageData, originalSize, format);
+    }
+
+    // 建议转换为JPEG
+    function suggestJPEGConversion(imageData, originalSize, format) {
+        console.log('开始JPEG转换...');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = imageData.img.naturalWidth;
+        canvas.height = imageData.img.naturalHeight;
+        
+        // 添加白色背景（因为要转换为JPEG）
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(imageData.img, 0, 0);
+        
+        console.log('转换为JPEG，质量80%...');
+        // 转换为JPEG，质量80%
+        canvas.toBlob((blob) => {
+            if (blob) {
+                console.log('JPEG转换成功:', {
+                    originalSize: originalSize,
+                    jpegSize: blob.size,
+                    sizeChange: blob.size - originalSize,
+                    success: blob.size <= originalSize
+                });
+                
+                if (blob.size <= originalSize) {
+                    console.log('JPEG转换成功且文件变小');
+                    const jpegFormat = { mime: 'image/jpeg', ext: 'jpg', quality: true };
+                    displayCompressedResult(blob, imageData, jpegFormat, 'jpg', 'image/jpeg');
+                    
+                    // 显示转换建议
+                    const formatNote = document.createElement('div');
+                    formatNote.style.fontSize = '0.9em';
+                    formatNote.style.color = '#e74c3c';
+                    formatNote.style.marginTop = '5px';
+                    formatNote.style.fontWeight = 'bold';
+                    formatNote.textContent = '💡 PNG压缩后变大，已自动转换为JPEG格式以获得更好的压缩效果';
+                    compressedInfo.appendChild(formatNote);
+                } else {
+                    console.log('JPEG转换后仍然变大，使用原图');
+                    useOriginalPNG(imageData, format);
+                }
+            } else {
+                console.log('JPEG转换失败，使用原图');
+                // 如果JPEG转换也失败，使用原图
+                useOriginalPNG(imageData, format);
+            }
+        }, 'image/jpeg', 0.8);
+    }
+
+    // 使用原图PNG
+    function useOriginalPNG(imageData, format) {
+        const compressedUrl = imageData.originalUrl;
+        compressedPreview.src = compressedUrl;
+        compressedPreview.style.display = 'block';
+        compressedPlaceholder.style.display = 'none';
+        compressedContainer.classList.add('has-image');
+        compressedInfo.innerHTML = `
+            <div>Size: ${(imageData.file.size / 1024).toFixed(2)} KB</div>
+            <div style="color: #27ae60; font-size: 0.9em;">✅ Original PNG preserved (unable to compress further)</div>
+        `;
+        
+        // 显示下载按钮
+        downloadBtn.style.display = 'inline-block';
+        downloadBtn.onclick = () => {
+            const link = document.createElement('a');
+            link.href = compressedUrl;
+            const originalName = imageData.file.name.substring(0, imageData.file.name.lastIndexOf('.')) || 'image';
+            link.download = `${originalName}_jpgtosmall.png`;
+            link.click();
+        };
+    }
+
+    // 显示压缩结果
+    function displayCompressedResult(blob, imageData, format, fileExtension, outputMimeType) {
+        const compressedUrl = URL.createObjectURL(blob);
+        compressedPreview.src = compressedUrl;
+        compressedPreview.style.display = 'block';
+        compressedPlaceholder.style.display = 'none';
+        compressedContainer.classList.add('has-image');
+        
+        // 显示压缩效果信息
+        const originalSize = imageData.file.size;
+        const compressedSize = blob.size;
+        const sizeChange = ((compressedSize - originalSize) / originalSize * 100).toFixed(1);
+        const sizeChangeText = sizeChange > 0 ? `+${sizeChange}%` : `${sizeChange}%`;
+        const sizeChangeColor = sizeChange > 0 ? '#e74c3c' : '#27ae60';
+        
+        compressedInfo.innerHTML = `
+            <div>Size: ${(blob.size / 1024).toFixed(2)} KB</div>
+            <div style="color: ${sizeChangeColor}; font-size: 0.9em;">
+                ${sizeChange > 0 ? '⚠️' : '✅'} ${sizeChangeText} change
+            </div>
+        `;
+
+        // 显示下载按钮
+        downloadBtn.style.display = 'inline-block';
+
+        // 设置下载按钮
+        downloadBtn.onclick = () => {
+            const link = document.createElement('a');
+            link.href = compressedUrl;
+            const originalName = imageData.file.name.substring(0, imageData.file.name.lastIndexOf('.')) || 'image';
+            link.download = `${originalName}_jpgtosmall.${fileExtension}`;
+            link.click();
+        };
+
+        // 显示格式转换提示
+        const originalFormat = imageData.file.type.split('/')[1].toUpperCase();
+        const outputFormatName = fileExtension.toUpperCase();
+
+        if (originalFormat !== outputFormatName) {
+            const formatNote = document.createElement('div');
+            formatNote.style.fontSize = '0.8em';
+            formatNote.style.color = '#666';
+            formatNote.style.marginTop = '5px';
+
+            if (outputMimeType === 'image/png' && hasTransparency(imageData.img)) {
+                formatNote.textContent = `Converted to PNG (transparent background preserved)`;
+            } else {
+                formatNote.textContent = `Converted from ${originalFormat} to ${outputFormatName}`;
+            }
+            compressedInfo.appendChild(formatNote);
         }
     }
 
