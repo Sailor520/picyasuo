@@ -2,9 +2,29 @@
 // This file handles different path configurations for local development vs production
 
 const config = {
-    // Environment detection
-    isProduction: window.location.hostname === 'www.jpgtosmall.com' || window.location.hostname === 'jpgtosmall.com',
-    isLocal: window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
+    // Environment detection - more robust detection
+    isProduction: function() {
+        const hostname = window.location.hostname;
+        const protocol = window.location.protocol;
+        
+        // Production: any domain that's not localhost, 127.0.0.1, or file://
+        return protocol === 'https:' && 
+               hostname !== 'localhost' && 
+               hostname !== '127.0.0.1' && 
+               hostname !== '' &&
+               !hostname.includes('file://');
+    },
+    
+    isLocal: function() {
+        const hostname = window.location.hostname;
+        const protocol = window.location.protocol;
+        
+        // Local: file:// protocol, localhost, or 127.0.0.1
+        return protocol === 'file:' || 
+               hostname === 'localhost' || 
+               hostname === '127.0.0.1' ||
+               hostname === '';
+    },
     
     // Base paths
     basePath: {
@@ -42,8 +62,8 @@ const config = {
     
     // Get current environment
     getEnvironment() {
-        if (this.isProduction) return 'production';
-        if (this.isLocal) return 'local';
+        if (this.isProduction()) return 'production';
+        if (this.isLocal()) return 'local';
         return 'development'; // fallback
     },
     
@@ -55,7 +75,10 @@ const config = {
     // Get asset path for current environment
     getAssetPath(filename) {
         const env = this.getEnvironment();
-        return this.assets[env] + filename;
+        console.log('Getting asset path for environment:', env, 'filename:', filename);
+        const path = this.assets[env] + filename;
+        console.log('Generated asset path:', path);
+        return path;
     },
     
     // Get page URL for current environment
@@ -86,5 +109,8 @@ console.log('JPG to Small Environment Config:', {
     environment: config.getEnvironment(),
     basePath: config.getBasePath(),
     assetPath: config.getAssetPath('logo-64.svg'),
-    homePage: config.getPageUrl('home')
+    homePage: config.getPageUrl('home'),
+    hostname: window.location.hostname,
+    protocol: window.location.protocol,
+    href: window.location.href
 });

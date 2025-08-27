@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Path Configuration Debug - JPGtoSmall</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .debug-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid #007aff;
+        }
+        .debug-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #e9ecef;
+        }
+        .debug-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        .debug-value {
+            font-family: monospace;
+            background: #f1f3f4;
+            padding: 8px;
+            border-radius: 4px;
+            word-break: break-all;
+        }
+        .status-success {
+            color: #27ae60;
+            font-weight: 600;
+        }
+        .status-warning {
+            color: #f39c12;
+            font-weight: 600;
+        }
+        .status-error {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        .test-button {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Path Configuration Debug</h1>
+    <p>This page helps debug the environment detection and path configuration system.</p>
+    
+    <div class="debug-section">
+        <h2>Environment Detection</h2>
+        <div class="debug-item">
+            <div class="debug-label">Current Environment:</div>
+            <div class="debug-value" id="currentEnvironment">Loading...</div>
+        </div>
+        <div class="debug-item">
+            <div class="debug-label">Hostname:</div>
+            <div class="debug-value" id="hostname">Loading...</div>
+        </div>
+        <div class="debug-item">
+            <div class="debug-label">Protocol:</div>
+            <div class="debug-value" id="protocol">Loading...</div>
+        </div>
+        <div class="debug-item">
+            <div class="debug-label">Full URL:</div>
+            <div class="debug-value" id="fullUrl">Loading...</div>
+        </div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Path Configuration</h2>
+        <div class="debug-item">
+            <div class="debug-label">Asset Path (logo-64.svg):</div>
+            <div class="debug-value" id="assetPath">Loading...</div>
+        </div>
+        <div class="debug-item">
+            <div class="debug-label">Page Path (about):</div>
+            <div class="debug-value" id="pagePath">Loading...</div>
+        </div>
+        <div class="debug-item">
+            <div class="debug-label">Base Path:</div>
+            <div class="debug-value" id="basePath">Loading...</div>
+        </div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Resource Loading Test</h2>
+        <div class="debug-item">
+            <div class="debug-label">Logo Image:</div>
+            <img id="testLogo" src="assets/logo-64.svg" alt="Test Logo" style="width: 32px; height: 32px;">
+            <div id="logoStatus">Loading...</div>
+        </div>
+        <div class="debug-item">
+            <div class="debug-label">Compress Icon:</div>
+            <img id="testIcon" src="assets/compress-icon.svg" alt="Test Icon" style="width: 24px; height: 24px;">
+            <div id="iconStatus">Loading...</div>
+        </div>
+        <button class="test-button" onclick="testResourceLoading()">Test Resource Loading</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Configuration Object</h2>
+        <div class="debug-item">
+            <div class="debug-label">Config Object:</div>
+            <div class="debug-value" id="configObject">Loading...</div>
+        </div>
+        <button class="test-button" onclick="reloadConfig()">Reload Configuration</button>
+    </div>
+
+    <!-- Environment Configuration -->
+    <script src="config.js"></script>
+    
+    <script>
+        function updateDebugInfo() {
+            if (typeof window.appConfig === 'undefined') {
+                document.getElementById('currentEnvironment').innerHTML = '<span class="status-error">❌ Config not loaded</span>';
+                return;
+            }
+            
+            const config = window.appConfig;
+            const env = config.getEnvironment();
+            
+            // Environment info
+            document.getElementById('currentEnvironment').innerHTML = 
+                `<span class="status-success">✅ ${env}</span>`;
+            document.getElementById('hostname').textContent = window.location.hostname;
+            document.getElementById('protocol').textContent = window.location.protocol;
+            document.getElementById('fullUrl').textContent = window.location.href;
+            
+            // Path info
+            document.getElementById('assetPath').textContent = config.getAssetPath('logo-64.svg');
+            document.getElementById('pagePath').textContent = config.getPageUrl('about');
+            document.getElementById('basePath').textContent = config.getBasePath();
+            
+            // Config object
+            document.getElementById('configObject').textContent = JSON.stringify(config, null, 2);
+        }
+        
+        function testResourceLoading() {
+            const logo = document.getElementById('testLogo');
+            const icon = document.getElementById('testIcon');
+            
+            // Test logo
+            logo.onload = () => {
+                document.getElementById('logoStatus').innerHTML = '<span class="status-success">✅ Logo loaded successfully</span>';
+            };
+            logo.onerror = () => {
+                document.getElementById('logoStatus').innerHTML = '<span class="status-error">❌ Logo failed to load</span>';
+            };
+            
+            // Test icon
+            icon.onload = () => {
+                document.getElementById('iconStatus').innerHTML = '<span class="status-success">✅ Icon loaded successfully</span>';
+            };
+            icon.onerror = () => {
+                document.getElementById('iconStatus').innerHTML = '<span class="status-error">❌ Icon failed to load</span>';
+            };
+            
+            // Trigger reload
+            logo.src = logo.src;
+            icon.src = icon.src;
+        }
+        
+        function reloadConfig() {
+            updateDebugInfo();
+        }
+        
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            setTimeout(updateDebugInfo, 100);
+        });
+        
+        // Update every 2 seconds for debugging
+        setInterval(updateDebugInfo, 2000);
+    </script>
+</body>
+</html>

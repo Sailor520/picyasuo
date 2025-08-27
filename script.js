@@ -76,6 +76,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const config = window.appConfig;
         const env = config.getEnvironment();
         console.log('Configuring paths for environment:', env);
+        console.log('Current location:', {
+            hostname: window.location.hostname,
+            protocol: window.location.protocol,
+            href: window.location.href
+        });
         
         // 配置favicon路径
         const favicon32 = document.getElementById('favicon32');
@@ -83,19 +88,43 @@ document.addEventListener('DOMContentLoaded', function() {
         const favicon16 = document.getElementById('favicon16');
         const appleTouchIcon = document.getElementById('appleTouchIcon');
         
-        if (favicon32) favicon32.href = config.getAssetPath('logo-32.svg');
-        if (favicon32sized) favicon32sized.href = config.getAssetPath('logo-32.svg');
-        if (favicon16) favicon16.href = config.getAssetPath('logo-16.svg');
-        if (appleTouchIcon) appleTouchIcon.href = config.getAssetPath('apple-touch-icon.svg');
+        if (favicon32) {
+            const newPath = config.getAssetPath('logo-32.svg');
+            favicon32.href = newPath;
+            console.log('Updated favicon32 href to:', newPath);
+        }
+        if (favicon32sized) {
+            const newPath = config.getAssetPath('logo-32.svg');
+            favicon32sized.href = newPath;
+            console.log('Updated favicon32sized href to:', newPath);
+        }
+        if (favicon16) {
+            const newPath = config.getAssetPath('logo-16.svg');
+            favicon16.href = newPath;
+            console.log('Updated favicon16 href to:', newPath);
+        }
+        if (appleTouchIcon) {
+            const newPath = config.getAssetPath('apple-touch-icon.svg');
+            appleTouchIcon.href = newPath;
+            console.log('Updated appleTouchIcon href to:', newPath);
+        }
         
         // 配置图片路径
         const brandLogo = document.getElementById('brandLogo');
         const uploadIcon = document.getElementById('uploadIcon');
         
-        if (brandLogo) brandLogo.src = config.getAssetPath('logo-64.svg');
-        if (uploadIcon) uploadIcon.src = config.getAssetPath('compress-icon.svg');
+        if (brandLogo) {
+            const newPath = config.getAssetPath('logo-64.svg');
+            brandLogo.src = newPath;
+            console.log('Updated brandLogo src to:', newPath);
+        }
+        if (uploadIcon) {
+            const newPath = config.getAssetPath('compress-icon.svg');
+            uploadIcon.src = newPath;
+            console.log('Updated uploadIcon src to:', newPath);
+        }
         
-        console.log('Paths configured successfully');
+        console.log('Paths configured successfully for environment:', env);
     }
 
     // 初始化格式选择

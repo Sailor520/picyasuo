@@ -30,12 +30,7 @@
         <changefreq>yearly</changefreq>
         <priority>0.3</priority>
     </url>
-    <url>
-        <loc>https://www.jpgtosmall.com/png-compression-test</loc>
-        <lastmod>2025-01-25</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
-    </url>
+    
     <url>
         <loc>https://www.jpgtosmall.com/generate-logo</loc>
         <lastmod>2025-01-25</lastmod>
