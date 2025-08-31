@@ -367,20 +367,22 @@ document.addEventListener('DOMContentLoaded', function() {
         canvas.width = width;
         canvas.height = height;
 
-        // 根据图片类型和透明度决定背景处理
-        const needsBackground = imageData.file.type === 'image/svg+xml' ||
-                               (imageData.file.type === 'image/png' && !hasTransparency(imageData.img));
+        // 修复背景处理逻辑：只有SVG才需要强制添加背景
+        // PNG和JPEG都应该保持原有背景状态，不被强制填充
+        const needsBackground = imageData.file.type === 'image/svg+xml';
 
         if (needsBackground) {
-            // 只有SVG或不透明的PNG才添加白色背景
+            // 只有SVG才添加白色背景
             ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+        } else {
+            // 对于PNG和JPEG，使用透明背景确保不被强制填充
+            // 使用 rgba(0,0,0,0) 创建完全透明的背景
+            ctx.fillStyle = 'rgba(0,0,0,0)';
             ctx.fillRect(0, 0, width, height);
         }
 
         try {
-            // 绘制压缩后的图片
-            ctx.drawImage(imageData.img, 0, 0, width, height);
-
             // 根据用户选择和图片特性确定输出格式
             const selectedFormat = getActualOutputFormat(imageData);
             const formatMap = {
@@ -396,9 +398,24 @@ document.addEventListener('DOMContentLoaded', function() {
             // PNG特殊处理：智能压缩策略
             if (selectedFormat === 'png' && imageData.file.type === 'image/png') {
                 console.log('开始PNG智能压缩处理');
-                handlePNGCompression(imageData, canvas, width, height, format);
+                // 为PNG创建新的Canvas，避免背景处理冲突
+                const pngCanvas = document.createElement('canvas');
+                const pngCtx = pngCanvas.getContext('2d');
+                pngCanvas.width = width;
+                pngCanvas.height = height;
+                
+                // PNG保持透明背景，不添加任何背景色
+                // 使用透明背景确保不被强制填充
+                pngCtx.fillStyle = 'rgba(0,0,0,0)';
+                pngCtx.fillRect(0, 0, width, height);
+                pngCtx.drawImage(imageData.img, 0, 0, width, height);
+                
+                handlePNGCompression(imageData, pngCanvas, width, height, format);
                 return;
             }
+            
+            // 对于JPEG和WebP，在主Canvas上绘制图片
+            ctx.drawImage(imageData.img, 0, 0, width, height);
             
             const compressionQuality = format.quality ? quality : 1.0;
 
@@ -496,14 +513,11 @@ document.addEventListener('DOMContentLoaded', function() {
             canvas.width = width;
             canvas.height = height;
             
-            // 检查透明度
-            if (hasTransparency(imageData.img)) {
-                ctx.drawImage(imageData.img, 0, 0, width, height);
-            } else {
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, width, height);
-                ctx.drawImage(imageData.img, 0, 0, width, height);
-            }
+            // 保持原有背景状态，不强制填充
+            // 使用透明背景确保不被强制填充
+            ctx.fillStyle = 'rgba(0,0,0,0)';
+            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(imageData.img, 0, 0, width, height);
             
             canvas.toBlob((blob) => {
                 if (blob) {
@@ -542,8 +556,10 @@ document.addEventListener('DOMContentLoaded', function() {
         canvas.width = imageData.img.naturalWidth;
         canvas.height = imageData.img.naturalHeight;
         
-        // 添加白色背景（因为要转换为JPEG）
-        ctx.fillStyle = '#FFFFFF';
+        // 保持原有背景状态，不强制填充
+        // 使用透明背景确保不被强制填充
+        // 注意：JPEG格式本身不支持透明度，透明区域会显示为默认背景色
+        ctx.fillStyle = 'rgba(0,0,0,0)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(imageData.img, 0, 0);
         

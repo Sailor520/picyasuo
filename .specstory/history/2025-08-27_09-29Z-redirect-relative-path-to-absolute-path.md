@@ -174,7 +174,68 @@ Read file: vercel.json
 
 ---
 
+我发现问题了！当前的配置只有重定向规则，但没有告诉 Vercel 如何处理不带 `.html` 扩展名的路径。我需要添加 `rewrites` 规则来将路径映射到对应的 HTML 文件。
 
+
+---
+
+<details><summary>Edit file: vercel.json</summary>
+
+修改vercel.json配置，添加rewrites规则来将不带扩展名的路径映射到对应的HTML文件
+
+**Chunk 1**
+Lines added: 16, lines removed: undefined
+
+```diff
+@@ -47,4 +47,20 @@
+        "source": "/sitemap.xml",
+        "destination": "/sitemap.xml"
++     },
++     {
++       "source": "/about",
++       "destination": "/about.html"
++     },
++     {
++       "source": "/contact",
++       "destination": "/contact.html"
++     },
++     {
++       "source": "/privacy",
++       "destination": "/privacy.html"
++     },
++     {
++       "source": "/404",
++       "destination": "/404.html"
+      }
+    ]
+```
+
+</details>
+
+---
+
+完成！我已经修复了 `vercel.json` 配置。问题在于之前的配置缺少了 `rewrites` 规则来将不带扩展名的路径映射到对应的 HTML 文件。
+
+## 修复说明：
+
+**问题原因**：
+- 之前的配置只有 `redirects`（重定向），但没有 `rewrites`（重写）规则
+- 重定向是将一个 URL 跳转到另一个 URL
+- 重写是内部将请求路径映射到实际文件，用户看到的 URL 不变
+
+**解决方案**：
+添加了 `rewrites` 规则：
+- `/about` → `/about.html`
+- `/contact` → `/contact.html` 
+- `/privacy` → `/privacy.html`
+- `/404` → `/404.html`
+
+## 现在的工作流程：
+1. 用户访问 `https://www.jpgtosmall.com/about`
+2. Vercel 通过 `rewrites` 规则内部将请求映射到 `/about.html`
+3. 如果用户访问 `https://www.jpgtosmall.com/about.html`，会通过 `redirects` 规则重定向到 `/about`
+
+这样配置后，你的页面应该能正常访问了。部署后请测试一下这些链接是否正常工作。
 
 ---
 
